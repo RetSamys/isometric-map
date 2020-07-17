@@ -2,6 +2,10 @@ var foregroundImg;
 var bgImg;
 var sq;
 var colpaths=[];
+var posX=0;
+var posY=0;
+var moving=false;
+var nostop=true;
 
 function startGame() {
 	sq=new component(30, 30, "red", ((window.innerWidth-30)/2), ((window.innerHeight-30)/2),backgroundLayer);
@@ -60,22 +64,22 @@ var topLayer={
 			if((e.pageX/topLayer.canvas.width)>.5){
 				topLayer.x=1;
 				if ((e.pageY/topLayer.canvas.height)>.5){
-					topLayer.y=1;
+					topLayer.y=.58;
 				}else{
-					topLayer.y=-1;
-				}
+					topLayer.y=-.58;				
+					}
 			}else{
 				topLayer.x=-1;
 				if ((e.pageY/topLayer.canvas.height)>.5){
-					topLayer.y=1;
+					topLayer.y=.58;
 				}else{
-					topLayer.y=-1;
+					topLayer.y=-.58;
 				}
 			}
 		});
 		window.addEventListener('mouseup', function (e) {
-            topLayer.x = false;
-            topLayer.y = false;
+            topLayer.x=false;
+			topLayer.y=false;
         });
 	},
 	    clear : function() {
@@ -129,25 +133,25 @@ function component(width, height, color, x, y, layerName,type) {
 }
 
 function updateGameArea() {
+    backgroundLayer.clear();  
+	topLayer.clear();
 	if (topLayer.x){
-		var nostop=true;
+		nostop=true;
 		for (i=0;i<colpaths.length;i++){
-			if (topLayer.context.isPointInPath(colpaths[i],bgImg.x-topLayer.x,bgImg.y-topLayer.y)){
+			if (topLayer.context.isPointInPath(colpaths[i],sq.x-bgImg.x+topLayer.x,sq.y-bgImg.y+topLayer.y)){
 				nostop=false;
+				console.log("collision");
 				break;
 			}
 		}
 		if (nostop){
 		bgImg.x-=topLayer.x;
-		bgImg.y-=topLayer.y*.58;
+		bgImg.y-=topLayer.y;
 		foregroundImg.x-=topLayer.x;
-		foregroundImg.y-=topLayer.y*.58;
+		foregroundImg.y-=topLayer.y;
 		}
 	}
-    backgroundLayer.clear();  
 	bgImg.update();
-	topLayer.clear();
 	foregroundImg.update();
 	sq.update();
-	topLayer.context.stroke();
 }
