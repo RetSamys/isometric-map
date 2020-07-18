@@ -4,15 +4,16 @@ var sq;
 var colpaths=[];
 var overlpaths=[];
 var overlimgs=[];
-var posX=0;
-var posY=0;
+var posX=(window.innerWidth-30)/2+15;
+var posY=(window.innerHeight-30)/2+15;
 var moving=false;
 var nostop=true;
+var speed=2;
 
 function startGame() {
 	sq=new component(30, 30, "red", ((window.innerWidth-30)/2), ((window.innerHeight-30)/2),backgroundLayer);
-	bgImg=new component(1242, 594, "1.png", 0, 0,backgroundLayer,"image");
-	foregroundImg=new component(1242, 594, "2.png", 0, 0,backgroundLayer,"image");
+	bgImg=new component(1242, 594, "1.png", posX, posY,backgroundLayer,"image");
+	foregroundImg=new component(1242, 594, "2.png", posX, posY,backgroundLayer,"image");
 	topLayer.start();
 	backgroundLayer.start();
 	updateGameArea();
@@ -27,7 +28,7 @@ var backgroundLayer = {
 		this.canvas.height = window.innerHeight;
 		this.context = this.canvas.getContext("2d");
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-		this.interval = setInterval(updateGameArea, 20);
+		this.interval = setInterval(updateGameArea, 30);
 	},
 	    clear : function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -59,7 +60,7 @@ var topLayer={
 		
 		//set up overlay areas
 		for(i=0;i<overlays.length;i++){
-			var pic=new component(overlays[i][0][0],overlays[i][0][1],overlays[i][0][2],0,0,topLayer,"image");
+			var pic=new component(overlays[i][0][0],overlays[i][0][1],overlays[i][0][2],posX, posY,topLayer,"image");
 			overlimgs.push(pic);
 			var o=new Path2D();
 			o.moveTo(overlays[i][1][0],overlays[i][1][1]);
@@ -95,19 +96,23 @@ var topLayer={
 		
 		
 		window.addEventListener('touchstart',function (e){
-			if((e.pageX/topLayer.canvas.width)>.5){
+			if((e.touches[0].clientX/topLayer.canvas.width)>.5){
 				topLayer.x=1;
-				if ((e.pageY/topLayer.canvas.height)>.5){
+				if ((e.touches[0].clientY/topLayer.canvas.height)>.5){
 					topLayer.y=.58;
+					console.log("lower right "+e.touches[0].clientX+" "+e.touches[0].clientY);
 				}else{
 					topLayer.y=-.58;				
+					console.log("upper right "+e.touches[0].clientX+" "+e.touches[0].clientY);
 					}
 			}else{
 				topLayer.x=-1;
-				if ((e.pageY/topLayer.canvas.height)>.5){
+				if ((e.touches[0].clientY/topLayer.canvas.height)>.5){
 					topLayer.y=.58;
+					console.log("lower left "+e.touches[0].clientX+" "+e.touches[0].clientY);
 				}else{
 					topLayer.y=-.58;
+					console.log("upper left "+e.touches[0].clientX+" "+e.touches[0].clientY);
 				}
 			}
 		});
@@ -196,7 +201,7 @@ function updateGameArea() {
 		nostop=true;
 		//collision detection
 		for (i=0;i<colpaths.length;i++){
-			if (topLayer.context.isPointInPath(colpaths[i],Math.round(sq.x-bgImg.x+topLayer.x),Math.round(sq.y-bgImg.y+topLayer.y))){
+			if (topLayer.context.isPointInPath(colpaths[i],Math.round(sq.x-bgImg.x+topLayer.x*speed),Math.round(sq.y-bgImg.y+topLayer.y*speed))){
 				nostop=false;
 				console.log("collision");
 				break;
@@ -205,14 +210,14 @@ function updateGameArea() {
 		
 		
 		if (nostop){
-		bgImg.x-=topLayer.x;
-		bgImg.y-=topLayer.y;
-		foregroundImg.x-=topLayer.x;
-		foregroundImg.y-=topLayer.y;
+		bgImg.x-=topLayer.x*speed;
+		bgImg.y-=topLayer.y*speed;
+		foregroundImg.x-=topLayer.x*speed;
+		foregroundImg.y-=topLayer.y*speed;
 		
 		for (i=0;i<overlimgs.length;i++){
-			overlimgs[i].x-=topLayer.x;
-			overlimgs[i].y-=topLayer.y;
+			overlimgs[i].x-=topLayer.x*speed;
+			overlimgs[i].y-=topLayer.y*speed;
 		}
 		
 		}
